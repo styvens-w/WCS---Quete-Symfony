@@ -7,32 +7,31 @@ use App\Entity\Season;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Faker\Factory;
 
 class SeasonFixtures extends Fixture implements DependentFixtureInterface
 {
-    public const SEASONS = [
-        [
-            'number' => '1',
-            'year' => '2010',
-            'description' => "La population entière a été ravagée par une épidémie d'origine inconnue, qui est envahie 
-            par les morts-vivants. Parti sur les traces de sa femme Lori et de son fils Carl, Rick arrive à Atlanta où, 
-            avec un groupe de rescapés, il va devoir apprendre à survivre et à tuer tout en cherchant une solution ou 
-            un remède.",
-            'program' => 'program_Walking Dead',
-        ],
-    ];
-
     public function load(ObjectManager $manager): void
     {
-        foreach (self::SEASONS as $key => $seasons) {
-            $season = new Season();
-            $season->setNumber($seasons['number']);
-            $season->setYear($seasons['year']);
-            $season->setDescription($seasons['description']);
-            $season->setProgram($this->getReference($seasons['program']));
-            $manager->persist($season);
-            $this->addReference('season' . $seasons['number'] . "_" . str_replace('program_', '', $seasons['program']), $season);
+        $faker = Factory::create('fr_FR');
+
+        // Boucle pour chaque série
+        for ($i = 1; $i <= 10; $i++) {
+            // Créer 5 saisons pour chaque série
+            for ($j = 1; $j <= 5; $j++) {
+                $season = new Season();
+                $season->setNumber($j);
+                $season->setYear($faker->year());
+                $season->setDescription($faker->paragraph());
+                $season->setProgram($this->getReference('program_' . $i));
+
+                $manager->persist($season);
+
+                // Créer une référence pour chaque saison
+                $this->addReference('season' . $i . '_' . $j, $season);
+            }
         }
+
         $manager->flush();
     }
 
